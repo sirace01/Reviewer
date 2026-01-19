@@ -1,0 +1,458 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elegance | Periodical Test Reviewer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(-45deg, #fdfbfb, #ebedee, #f5f7fa, #c3cfe2);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            margin: 0;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 28px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            transition: all 0.4s ease;
+        }
+
+        .rose-gold-text {
+            color: #B76E79;
+        }
+
+        .bg-rose-gold {
+            background-color: #B76E79;
+        }
+
+        .btn-choice {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn-choice:active {
+            transform: scale(0.97);
+        }
+
+        .choice-selected {
+            border-color: #B76E79 !important;
+            background-color: rgba(183, 110, 121, 0.12) !important;
+            box-shadow: 0 10px 20px rgba(183, 110, 121, 0.1);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .slide-up {
+            animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .progress-bar-fill {
+            transition: width 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #B76E79 !important;
+            box-shadow: 0 0 0 4px rgba(183, 110, 121, 0.1);
+        }
+
+        /* Leaderboard styling */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .leaderboard-row {
+            background: rgba(255, 255, 255, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        .leaderboard-row:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Responsive spacing adjustments */
+        @media (max-width: 640px) {
+            .glass-card {
+                padding: 1.5rem !important;
+                border-radius: 20px;
+            }
+            .quiz-container {
+                max-width: 100%;
+            }
+            .text-dynamic-title { font-size: 1.5rem; }
+            .text-dynamic-body { font-size: 0.95rem; }
+        }
+
+        @media (min-width: 641px) and (max-width: 1024px) {
+            .quiz-container {
+                max-width: 90%;
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .quiz-container {
+                max-width: 768px;
+            }
+        }
+
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(183, 110, 121, 0.4); border-radius: 10px; }
+    </style>
+</head>
+<body class="p-3 sm:p-6 lg:p-12">
+    <div id="app" class="quiz-container w-full mx-auto">
+        <!-- Progress Bar & Session Info -->
+        <div id="quiz-header" class="hidden mb-6 fade-in">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-3">
+                <span class="text-xs sm:text-sm font-bold rose-gold-text uppercase tracking-[0.2em]" id="progress-text">Question 1/50</span>
+                <span class="text-xs sm:text-sm font-medium text-slate-500 bg-white/40 px-3 py-1 rounded-full border border-white/40" id="user-display">Student Name</span>
+            </div>
+            <div class="w-full h-2.5 bg-white/50 rounded-full overflow-hidden border border-white/30 backdrop-blur-sm">
+                <div id="progress-bar" class="progress-bar-fill h-full bg-rose-gold shadow-[0_0_10px_rgba(183,110,121,0.5)]" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div id="main-content" class="glass-card p-6 sm:p-10 lg:p-12 transition-all duration-500 min-h-[450px] flex flex-col justify-center">
+            <!-- Dynamic Screens -->
+        </div>
+    </div>
+
+    <script>
+        const SECTIONS = ["8-Carnation", "8-Daffodil", "8-Daisy", "8-Sampaguita", "8-Allium", "8-Begonia", "8-Catleya", "8-Callalily", "8-Anthurium"];
+
+        // The question data stays consistent with original request
+        const QUESTIONS_DATA = [
+            { q: "Cosmetology, also referred to as Beauty Care, is primarily defined by which of the following objectives?", a: "The enhancement of appearance", b: "The psychological study of self-esteem", c: "The medical treatment of skin diseases", d: "The rigorous training of physical strength", correct: "The enhancement of appearance" },
+            { q: "Which author is credited with the statement “Beauty is in the eye of the beholder,” as mentioned in a novel published in 1878?", a: "Molly Bawn", b: "Plato", c: "Judith Jackson", d: "Aristotle", correct: "Molly Bawn" },
+            { q: "How does the application of self-awareness functionally impact an individual's lifestyle and daily habits?", a: "It ensures that beauty remains permanent by halting the natural aging process.", b: "It limits an individual's focus to immediate gratification rather than long-term health.", c: "It dictates that an individual must prioritize cosmetic enhancement over physical rest.", d: "It guides decisions regarding nutrition, sleep, and exercise to value and cherish one's life.", correct: "It guides decisions regarding nutrition, sleep, and exercise to value and cherish one's life." },
+            { q: "Which anatomical structure is responsible for the creation of new nail plate cells?", a: "Lunula", b: "Matrix", c: "Eponychium", d: "Hyponychium", correct: "Matrix" },
+            { q: "Which term describes the visible, whitish, crescent-shaped base of the nail?", a: "Lunula", b: "Nail Sinus", c: "Free Margin", d: "Solehorn Cuticle", correct: "Lunula" },
+            { q: "Which statement correctly characterizes the relationship between the matrix and the lunula?", a: "The matrix supports the nail bed, while the lunula produces keratin.", b: "The matrix is the dead tissue covering the lunula to prevent infection.", c: "The lunula is the visible portion of the matrix appearing as a whitish crescent.", d: "The lunula is the pocket where the nail root originates, independent of the matrix.", correct: "The lunula is the visible portion of the matrix appearing as a whitish crescent." },
+            { q: "Which practitioner specifically focuses on cutting men's hair and shaving or trimming mustaches?", a: "Barber", b: "Hair Stylist", c: "Make-up Artist", d: "Wellness Advisor", correct: "Barber" },
+            { q: "Which professional is responsible for applying cosmetic techniques to enhance a client's physical appearance?", a: "Barber", b: "Make-up Artist", c: "Wellness Advisor", d: "Massage Therapist", correct: "Make-up Artist" },
+            { q: "A client seeking guidance on stress management techniques, proper diet, and body fitness activities would be best served by which professional?", a: "Make-up Artist", b: "Massage Therapist", c: "Wellness Advisor", d: "Nail Professional", correct: "Wellness Advisor" },
+            { q: "Which Republic Act specifically declares sexual harassment unlawful in the employment, education, or training environment?", a: "Republic Act No. 7877", b: "Republic Act No. 9262", c: "Republic Act No. 6713", d: "Republic Act No. 10175", correct: "Republic Act No. 7877" },
+            { q: "According to Section 3 of the anti-sexual harassment law, what specific attribute must an offender possess in relation to the victim to commit the offense?", a: "Seniority in age or tenure only", b: "Physical strength or superior size", c: "Financial debt or monetary obligation", d: "Authority, influence, or moral ascendancy", correct: "Authority, influence, or moral ascendancy" },
+            { q: "Which professional issue is illustrated when a stylist causes hair damage by failing to rinse a chemical re-bonding mixture within the required timeframe?", a: "Moral Ascendancy", b: "Procedural Negligence", c: "Resource Allocation", d: "Sexual Harassment", correct: "Procedural Negligence" },
+            { q: "A stylist exceeds the processing time for a chemical treatment, resulting in visible hair damage and potential scalp irritation. Which immediate response best prioritizes ethical accountability over reputational preservation?", a: "Immediately neutralizing the chemical, assessing the damage, and transparently informing the client of the error.", b: "Quickly applying a deep conditioning mask to conceal the texture damage before the client notices the mistake.", c: "Blaming the product manufacturer for the unexpected reaction and offering a discount on future repair treatments.", d: "Finishing the styling process rapidly to get the client out of the chair before they can register a verbal complaint.", correct: "Immediately neutralizing the chemical, assessing the damage, and transparently informing the client of the error." },
+            { q: "During a pre-service assessment, a therapist discovers a client is intoxicated. Analyzing the risks associated with wellness services, which course of action effectively solves the potential safety and liability problem?", a: "Refuse the service politely to prevent injury and professional liability risks.", b: "Request a colleague to witness the session to ensure appropriate behavior.", c: "Record the session to document that standard protocols were strictly followed.", d: "Perform a lighter massage technique to avoid aggravating the client's condition.", correct: "Refuse the service politely to prevent injury and professional liability risks." },
+            { q: "How can salon owners effectively address the issue of hired staff lacking required qualifications?", a: "By assigning them strictly to administrative duties", b: "By replacing them immediately with new applicants", c: "By reducing their salary until performance improves", d: "By conducting hands-on training and updating skills", correct: "By conducting hands-on training and updating skills" },
+            { q: "How does the acquisition of modern equipment and updated salon products directly impact the competitive standing of a beauty business?", a: "It substantially lowers operational overhead expenses regarding monthly utility usage", b: "It facilitates immediate business expansion into unrelated international market sectors", c: "It permits the management to reduce the aggregate workforce size needed for daily tasks", d: "It secures continuous operation by satisfying client demands for current quality standards", correct: "It secures continuous operation by satisfying client demands for current quality standards" },
+            { q: "A salon owner receives numerous applications but finds that most candidates lack the specific technical skills required for the role. Which strategy effectively resolves this workforce gap while maintaining service standards?", a: "Reducing the complexity of services to match the current applicant pool.", b: "Conducting internal hands-on training to upskill the available applicants.", c: "Suspending recruitment until the market produces higher-qualified talent.", d: "Increasing the starting salary to immediately attract experts from competitors.", correct: "Conducting internal hands-on training to upskill the available applicants." },
+            { q: "Why is the strict vetting of product ingredients a critical component of risk management and long-term business sustainability in the beauty industry?", a: "It ensures compliance with international import taxes and trade tariffs.", b: "It guarantees that all services can be completed in a shorter time frame.", c: "It prevents adverse allergic reactions that can destroy business credibility.", d: "It reduces the overhead costs associated with frequent inventory restocking.", correct: "It prevents adverse allergic reactions that can destroy business credibility." },
+            { q: "In a saturated market, how does the acquisition of modern equipment and tools functionally impact a beauty salon's ability to remain operational?", a: "It allows the business to justify immediate price hikes to cover capital costs.", b: "It eliminates the need for employing highly skilled manual labor for services.", c: "It reduces the frequency of mandatory health and safety inspections required.", d: "It aligns service delivery with current standards to ensure client satisfaction.", correct: "It aligns service delivery with current standards to ensure client satisfaction." },
+            { q: "Which instrument part is specifically designated for removing dead tissue from the nail plate?", a: "The flat edge of a nail care spatula", b: "The abrasive surface of a nail buffer", c: "The spoon end of a metal nail pusher", d: "The spade end of a metal nail pusher", correct: "The spade end of a metal nail pusher" },
+            { q: "In a facial care routine, what is the primary purpose of applying a facial toner?", a: "To moisturize the face and prevent it from drying out", b: "To deeply penetrate the skin layers with fruit extracts", c: "To manually suction oil and dead skin from the pores", d: "To remove bacteria and dirt left behind by the cleanser", correct: "To remove bacteria and dirt left behind by the cleanser" },
+            { q: "What is the specific function of the spade end of a metal nail pusher?", a: "To shorten the length of the nails before filing", b: "To trim the live cuticle skin around the nail bed", c: "To exfoliate dry skin and smooth calluses on feet", d: "To remove dead tissue from the nail plate surface", correct: "To remove dead tissue from the nail plate surface" },
+            { q: "During a professional nail service, a technician needs to push back the cuticle and clean excess polish from the free edge. Which implement should be selected if the protocol requires a disposable tool that must be discarded after a single use?", a: "Cuticle Skin Nipper", b: "Metal Nail Pusher", c: "Nail Care Spatula", d: "Orange Wood Stick", correct: "Orange Wood Stick" },
+            { q: "Which term describes a traditional Filipino healing practice that utilizes hand manipulations, such as rubbing and pressure, to promote healing?", a: "Hilot", b: "Massage", c: "Hand Spa", d: "Reflexology", correct: "Hilot" },
+            { q: "What distinguishes Reflexology from other forms of body manipulation and massage?", a: "It focuses on general muscle manipulation to ease joint pain.", b: "It relies exclusively on chemical mixtures to rejuvenate the skin.", c: "It connects reflex points on the head, hands, and feet to the body.", d: "It utilizes traditional Filipino healing methods to promote recovery.", correct: "It connects reflex points on the head, hands, and feet to the body." },
+            { q: "A new client is seated for a chemical treatment. Before opening any products or beginning the application, what verbal verification must the practitioner complete to ensure client safety?", a: "Verify the client is comfortable in the chair.", b: "Ask if the client has had this service before.", c: "Confirm the client likes the product's scent.", d: "Ask if the client has any history of allergies.", correct: "Ask if the client has any history of allergies." },
+            { q: "What is the primary method recommended for preventing musculoskeletal injuries and body sprains associated with ergonomic hazards?", a: "Wearing shoes made of rubber materials", b: "Using electrical tape to repair open wires", c: "Properly bending knees when lifting items", d: "Storing dangerous tools in safe containers", correct: "Properly bending knees when lifting items" },
+            { q: "Which description best characterizes a biological hazard within a salon setting?", a: "Transmission of bacteria via unclean instruments.", b: "Exposure to toxic fumes causing respiratory issues.", c: "Muscle strain resulting from improper body posture.", d: "Electric shock caused by overloaded extension cords.", correct: "Transmission of bacteria via unclean instruments." },
+            { q: "To prevent a biological hazard outbreak similar to the flu or Covid-virus within the workplace, which protocol must be strictly enforced regarding salon equipment?", a: "Store all equipment in high cabinets to avoid physical contact.", b: "Wash and clean all tools to stop the spread of harmful bacteria.", c: "Handle all sharp equipment with extra care to avoid accidental cuts.", d: "Repair exposed wires on equipment using heavy-duty electrical tape.", correct: "Wash and clean all tools to stop the spread of harmful bacteria." },
+            { q: "Which respiratory condition is explicitly identified as a potential risk for salon staff regularly exposed to chemicals?", a: "Allergic rhinitis", b: "Bronchial asthma", c: "Chronic bronchitis", d: "Sinus infection", correct: "Bronchial asthma" },
+            { q: "When applying a hair treatment involving hydrogen peroxide, a technician needs to prevent chemical burns or irritation on their hands. Which action best mitigates this risk?", a: "Washing hands immediately after use.", b: "Using a disposable apron for coverage.", c: "Putting on a Type 2 face mask securely.", d: "Wearing disposable vinyl or nitrile gloves.", correct: "Wearing disposable vinyl or nitrile gloves." },
+            { q: "An auditor is inspecting a full-service salon that offers tattooing, massage, and hair care. The auditor notes that staff members are wearing standard cloth face coverings rather than medical-grade protection. Why is this practice considered a critical violation of safety standards?", a: "Type 2 face masks are strictly required for these services to ensure safety.", b: "Standard cloth coverings fail to protect against chemical spills on the skin.", c: "Cloth masks prevent the staff from communicating clearly with their clients.", d: "Disposable aprons cannot function effectively without a medical-grade mask.", correct: "Type 2 face masks are strictly required for these services to ensure safety." },
+            { q: "What common ingredients are combined to create an exfoliating mixture for the hand scrubbing process?", a: "Cuticle cream and sea salt", b: "Massage oil and baking soda", c: "Coconut oil and brown sugar", d: "Warm water and mineral salt", correct: "Coconut oil and brown sugar" },
+            { q: "During a hand spa session, a client mentions experiencing stiffness and discomfort associated with arthritis. Which massage technique should the technician apply to directly alleviate this condition?", a: "Clasping the hands gently for one minute to generate heat", b: "Tapping and shaking the hands to complete the treatment", c: "Sliding thumbs outward across the palm to open the hand", d: "Interlocking fingers and moving the wrist in circular motions", correct: "Interlocking fingers and moving the wrist in circular motions" },
+            { q: "Why is the procedural sequence of soaking the hands in warm water prior to applying the hand scrub considered essential for the treatment's efficacy?", a: "It allows the skin to soften for effective dead cell removal.", b: "It ensures the nail polish adheres properly to the nail bed.", c: "It eliminates the need for sanitizing the hands beforehand.", d: "It prevents the abrasive ingredients from dissolving quickly.", correct: "It allows the skin to soften for effective dead cell removal." },
+            { q: "Which group of items is classified as ethnic clothing?", a: "Blouses, loafers, skirts, and slacks", b: "Sarees, kimonos, kilts, and hanboks", c: "Jeans, sweaters, shorts, and T-shirts", d: "Robes, pajamas, nightgowns, and sets", correct: "Sarees, kimonos, kilts, and hanboks" },
+            { q: "A runner is selecting gear for an upcoming marathon in a humid climate. To maximize performance and comfort during the race, which material and garment type should be prioritized?", a: "A silk pajama set intended for soft, breathable relaxation.", b: "A heavy wool coat designed to provide maximum insulation.", c: "A moisture-wicking shirt designed for flexibility and breathability.", d: "A formal blazer constructed to provide a sophisticated appearance.", correct: "A moisture-wicking shirt designed for flexibility and breathability." },
+            { q: "An employee has been instructed to attend a professional seminar where the dress code balances office professionalism with personal comfort, avoiding strictly formal attire. Which ensemble best solves this dress code requirement?", a: "A graphic t-shirt paired with denim jeans", b: "A tuxedo paired with patent leather shoes", c: "Dress pants paired with a blouse and loafers", d: "Yoga pants paired with a moisture-wicking top", correct: "Dress pants paired with a blouse and loafers" },
+            { q: "Which specific agricultural waste product is processed to create the sustainable material known as Piñatex?", a: "Cellulose derived from orange peels", b: "Pulps processed from bamboo shoots", c: "Fibers extracted from pineapple leaves", d: "Stalks harvested from industrial hemp", correct: "Fibers extracted from pineapple leaves" },
+            { q: "A healthcare startup aims to reduce hospital readmissions for elderly patients living alone. Which product development strategy best utilizes current smart fabric innovations to address this specific challenge?", a: "Creating cotton robes that provide superior comfort and high durability.", b: "Manufacturing non-slip socks to prevent falls in the bathroom or kitchen.", c: "Designing pajamas with embedded sensors to monitor vital signs remotely.", d: "Developing an accompanying mobile app that reminds patients to take pills.", correct: "Designing pajamas with embedded sensors to monitor vital signs remotely." },
+            { q: "A design team is tasked with developing a clothing line that accommodates the widest range of body types and identities without producing separate categories. Which design approach best satisfies these parameters?", a: "Designing adjustable, non-binary silhouettes with modular fasteners.", b: "Focusing on traditional suits tailored specifically for masculine shapes.", c: "Producing only oversized t-shirts and sweatpants in neutral earth tones.", d: "Creating separate lines for men and women using identical color palettes.", correct: "Designing adjustable, non-binary silhouettes with modular fasteners." },
+            { q: "A hiker needs a pair of pants that will allow them to climb steep, rocky trails without feeling restricted. Which material selection best addresses this need?", a: "Add extra pockets on the legs to carry heavy hiking equipment.", b: "Use flatlock seams to ensure the pants look stylish on the trail.", c: "Design the pants with stretch fabric to increase the range of motion.", d: "Choose a rigid denim material that offers maximum protection from rocks.", correct: "Design the pants with stretch fabric to increase the range of motion." },
+            { q: "Construction workers report overheating and restricted movement in their current uniforms. Which design modification best addresses these specific ergonomic concerns?", a: "Adding reflective strips to increase visibility in low-light conditions.", b: "Incorporating flatlock seams to increase the garment's overall lifespan.", c: "Using heavier fabrics to provide better protection and support to joints.", d: "Switching to lightweight, moisture-wicking fabrics with stretch capabilities.", correct: "Switching to lightweight, moisture-wicking fabrics with stretch capabilities." },
+            { q: "You are designing a pair of leggings for runners who train early in the morning when it is still dark. Which functional additions would best improve safety and utility for this user?", a: "Adding reflective elements for visibility and pockets for storage.", b: "Placing large buttons at the ankles for adjustable sizing options.", c: "Using thick, non-stretch fabric to provide maximum leg support.", d: "Removing all seams to create a completely smooth surface texture.", correct: "Adding reflective elements for visibility and pockets for storage." },
+            { q: "A student is drafting a pattern and needs to draw a smooth curve for the neckline and armholes. Which tool should be selected to accurately connect these specific arcs?", a: "A hip curve", b: "An L-Square", c: "A meter stick", d: "A French curve", correct: "A French curve" },
+            { q: "A sewist needs to transfer specific marks from a paper pattern directly onto a piece of fabric. Which combination of tools provides the correct solution for this task?", a: "A piece of tailor's chalk and a plastic ruler", b: "A standard hand needle and a pincushion", c: "A pair of embroidery scissors and a thimble", d: "A tracing wheel and dressmaker’s carbon paper", correct: "A tracing wheel and dressmaker’s carbon paper" },
+            { q: "A sewer needs to measure several short hex folds and buttonholes. Which tool is best suited for these small, repetitive measurements?", a: "A meter stick", b: "A sewing gauge", c: "A tape measure", d: "A tracing wheel", correct: "A sewing gauge" },
+            { q: "A tailor observes that a client's finished trousers fit perfectly at the waist but are uncomfortably tight across the seat when sitting. Which specific procedural error during the hip measurement likely caused this functional issue?", a: "The circumference was measured around the waistline instead of the hip bone.", b: "The vertical distance was measured from the waist down to the tip of an L-square.", c: "The tape measure was pulled tight without inserting two fingers for necessary ease.", d: "The measurement was taken at the narrowest part of the torso rather than the fullest.", correct: "The tape measure was pulled tight without inserting two fingers for necessary ease." },
+            { q: "You are designing a long-sleeve shirt for a drummer who needs extra room for wrist movement while playing. How would you adapt the \"Lower arm girth\" measurement process to ensure their comfort?", a: "Take the measurement from the shoulder tip down to the wrist bone.", b: "Take the measurement tightly around the wrist for a streamlined look.", c: "Take the measurement around the upper arm and use that for the wrist.", d: "Take the measurement around the arm and add allowance for adjustments.", correct: "Take the measurement around the arm and add allowance for adjustments." },
+            { q: "You are designing a structured jacket that needs to fit perfectly across the back width. How would you plan the \"Shoulder\" measurement to ensure the jacket pads sit correctly?", a: "Measure around the fullest part of the chest under the armpits.", b: "Measure from the nape of the neck down to the center of the back.", c: "Measure around the neck and add two inches for the shoulder pads.", d: "Measure from one shoulder point directly to the other shoulder point.", correct: "Measure from one shoulder point directly to the other shoulder point." }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+        let canAnswer = true;
+        let userData = { firstName: "", lastName: "", section: "" };
+
+        const mainContent = document.getElementById('main-content');
+        const quizHeader = document.getElementById('quiz-header');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const userDisplay = document.getElementById('user-display');
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function initApp() {
+            renderRegistrationScreen();
+        }
+
+        function renderRegistrationScreen() {
+            quizHeader.classList.add('hidden');
+            mainContent.innerHTML = `
+                <div class="slide-up w-full max-w-lg mx-auto">
+                    <div class="text-center mb-10">
+                        <div class="inline-block p-4 bg-white/60 rounded-3xl shadow-sm mb-4">
+                            <svg class="w-10 h-10 rose-gold-text" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                        </div>
+                        <h1 class="text-3xl font-bold text-slate-800 tracking-tight">Student Access</h1>
+                        <p class="text-slate-500 mt-2">Enter your credentials to begin your session.</p>
+                    </div>
+                    
+                    <form id="reg-form" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">First Name</label>
+                                <input type="text" id="firstName" required class="w-full p-4 rounded-2xl border-2 border-white/50 bg-white/40 focus:bg-white transition-all shadow-sm text-slate-700" placeholder="e.g. Maria">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Last Name</label>
+                                <input type="text" id="lastName" required class="w-full p-4 rounded-2xl border-2 border-white/50 bg-white/40 focus:bg-white transition-all shadow-sm text-slate-700" placeholder="e.g. Santos">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 px-1">Section</label>
+                            <select id="section" required class="w-full p-4 rounded-2xl border-2 border-white/50 bg-white/40 focus:bg-white transition-all shadow-sm text-slate-700 appearance-none cursor-pointer">
+                                <option value="" disabled selected>Choose your section...</option>
+                                ${SECTIONS.map(s => `<option value="${s}">${s}</option>`).join('')}
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-rose-gold hover:bg-[#a6626d] text-white font-bold py-5 px-8 rounded-2xl shadow-xl transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-3 mt-6">
+                            Start Examination
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            `;
+            
+            document.getElementById('reg-form').onsubmit = (e) => {
+                e.preventDefault();
+                userData.firstName = document.getElementById('firstName').value.trim();
+                userData.lastName = document.getElementById('lastName').value.trim();
+                userData.section = document.getElementById('section').value;
+                startQuiz();
+            };
+        }
+
+        function startQuiz() {
+            score = 0;
+            currentQuestionIndex = 0;
+            shuffledQuestions = shuffleArray([...QUESTIONS_DATA]).map(q => {
+                const options = shuffleArray([q.a, q.b, q.c, q.d]);
+                return { ...q, options };
+            });
+            quizHeader.classList.remove('hidden');
+            userDisplay.innerText = `${userData.firstName} ${userData.lastName}`;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            canAnswer = true;
+            const q = shuffledQuestions[currentQuestionIndex];
+            
+            const progressPercent = (currentQuestionIndex / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            progressText.innerText = `Question ${currentQuestionIndex + 1}/${shuffledQuestions.length}`;
+
+            mainContent.innerHTML = `
+                <div class="slide-up">
+                    <div class="mb-10">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="px-3 py-1 bg-rose-gold/10 rounded-full text-[10px] font-black rose-gold-text uppercase tracking-widest">Assessment Mode</span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Module 1</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 leading-tight">${q.q}</h2>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 sm:gap-4" id="choices-container">
+                        ${q.options.map((option, index) => `
+                            <button class="btn-choice w-full text-left p-4 sm:p-5 rounded-2xl border-2 border-white bg-white/30 hover:bg-white/90 hover:border-rose-gold/30 text-slate-700 font-medium flex items-center gap-4 group shadow-sm" onclick="handleSelect('${option.replace(/'/g, "\\'")}', this)">
+                                <span class="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-slate-100 group-hover:bg-rose-gold group-hover:text-white transition-all text-xs font-black shadow-inner">${String.fromCharCode(65 + index)}</span>
+                                <span class="flex-1 text-sm sm:text-base leading-relaxed">${option}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.handleSelect = function(selected, element) {
+            if (!canAnswer) return;
+            canAnswer = false;
+
+            const q = shuffledQuestions[currentQuestionIndex];
+            element.classList.add('choice-selected');
+            
+            if (selected === q.correct) {
+                score++;
+            }
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    renderQuestion();
+                } else {
+                    saveAndRenderResults();
+                }
+            }, 800);
+        };
+
+        function saveAndRenderResults() {
+            quizHeader.classList.add('hidden');
+            
+            const result = {
+                id: Date.now(),
+                name: `${userData.firstName} ${userData.lastName}`,
+                section: userData.section,
+                score: score,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            let leaderboard = JSON.parse(localStorage.getItem('reviewer_leaderboard') || '[]');
+            leaderboard.push(result);
+            leaderboard.sort((a, b) => b.score - a.score || b.id - a.id);
+            localStorage.setItem('reviewer_leaderboard', JSON.stringify(leaderboard));
+
+            const top10 = leaderboard.slice(0, 10);
+            const percentage = (score / shuffledQuestions.length) * 100;
+            
+            if (percentage >= 75) triggerConfetti();
+
+            mainContent.innerHTML = `
+                <div class="text-center slide-up pb-8">
+                    <div class="mb-8">
+                        <h2 class="text-3xl sm:text-4xl font-black text-slate-800 mb-2">Final Report</h2>
+                        <p class="text-slate-500 font-medium">Session concluded for ${userData.firstName}</p>
+                    </div>
+                    
+                    <div class="inline-flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 w-full">
+                        <div class="bg-white/60 backdrop-blur-md px-10 py-8 rounded-[2rem] border border-white shadow-xl w-full sm:w-auto">
+                            <div class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-2">Total Score</div>
+                            <div class="text-5xl font-black rose-gold-text tabular-nums">${score}<span class="text-slate-300 text-2xl mx-1">/</span>${shuffledQuestions.length}</div>
+                        </div>
+                        <div class="bg-slate-800 px-10 py-8 rounded-[2rem] shadow-2xl w-full sm:w-auto">
+                            <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Efficiency</div>
+                            <div class="text-5xl font-black text-white tabular-nums">${Math.round(percentage)}%</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 text-left">
+                        <div class="flex items-center justify-between mb-6 px-2">
+                            <h3 class="text-lg font-black text-slate-800 uppercase tracking-tighter flex items-center gap-2">
+                                <span class="p-1.5 bg-rose-gold rounded-lg text-white">
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                                </span>
+                                Global High Scores
+                            </h3>
+                            <span class="text-[10px] font-bold text-slate-400">TOP 10</span>
+                        </div>
+                        <div class="overflow-hidden rounded-2xl border border-white/50 shadow-inner bg-white/20">
+                            <div class="overflow-x-auto">
+                                <table class="leaderboard-table px-4">
+                                    <thead>
+                                        <tr class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-left">
+                                            <th class="pl-6 pb-2">Pos</th>
+                                            <th class="px-4 pb-2">Student</th>
+                                            <th class="px-4 pb-2 hidden sm:table-cell">Section</th>
+                                            <th class="pr-6 pb-2 text-right">Score</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-white/20">
+                                        ${top10.map((entry, i) => `
+                                            <tr class="leaderboard-row group">
+                                                <td class="pl-6 py-4 text-xs font-black ${i < 3 ? 'rose-gold-text' : 'text-slate-400'}">${i + 1}</td>
+                                                <td class="px-4 py-4">
+                                                    <div class="text-sm font-bold text-slate-800 flex items-center gap-2 truncate max-w-[150px] sm:max-w-none">
+                                                        ${entry.name}
+                                                        ${entry.id === result.id ? '<span class="text-[8px] bg-rose-gold text-white px-1.5 py-0.5 rounded-md uppercase font-black">You</span>' : ''}
+                                                    </div>
+                                                    <div class="text-[10px] text-slate-400 sm:hidden">${entry.section}</div>
+                                                </td>
+                                                <td class="px-4 py-4 text-xs font-medium text-slate-500 hidden sm:table-cell">${entry.section}</td>
+                                                <td class="pr-6 py-4 text-sm font-black text-slate-800 text-right">${entry.score}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-12 space-y-3">
+                        <button onclick="renderRegistrationScreen()" class="w-full bg-slate-800 hover:bg-black text-white font-bold py-5 px-8 rounded-2xl shadow-xl transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2">
+                            Restart Application
+                        </button>
+                        <p class="text-[9px] text-slate-400 text-center italic opacity-75">All data is encrypted and stored locally in your browser environment.</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function triggerConfetti() {
+            const count = 200;
+            const defaults = { origin: { y: 0.7 }, zIndex: 1000 };
+            function fire(particleRatio, opts) {
+                confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) });
+            }
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
